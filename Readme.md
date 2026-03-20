@@ -1,3 +1,5 @@
+**Deployed live at: https://niju7410-ids-intrusion-detection.hf.space**
+
 # Intrusion Detection System (IDS) with Supervised Learning
 
 A machine learning-based IDS to classify network traffic as normal or anomalous using the NSL-KDD dataset. Achieves 99.76% accuracy with a Random Forest Classifier and includes a Streamlit app for interactive predictions and visualizations.
