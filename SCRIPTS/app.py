@@ -58,7 +58,7 @@ def load_metadata():
             "model_name": "Intrusion Detection System",
             "model_type": "Random Forest Classifier", 
             "accuracy": 0.9976,
-            "f1_score": 0.9974,
+            "f1_anomaly": 0.9974,
             "roc_auc": 0.9989,
             "false_positive_rate": 0.008,
             "false_negative_rate": 0.003,
@@ -221,7 +221,7 @@ if page == "Batch Predict":
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
         st.markdown("### 📋 Data Preview")
-        st.dataframe(data.head(), use_container_width=True)
+        st.dataframe(data.head(), width='stretch')
         
         try:
             categorical_cols = ['protocol_type', 'service', 'flag']
@@ -231,7 +231,7 @@ if page == "Batch Predict":
         except Exception as e:
             st.error(f"Encoding Error: {e}")
         
-        if st.button("🚀 Run Batch Prediction", use_container_width=True, type="primary"):
+        if st.button("🚀 Run Batch Prediction", width='stretch', type="primary"):
             with st.spinner("Analyzing network traffic vectors..."):
                 try:
                     time.sleep(0.5) # Slight UX delay
@@ -345,7 +345,7 @@ if page == "Batch Predict":
             display_df = res[display_cols].copy()
             styled_df = display_df.head(100).style.map(highlight_pred, subset=['Prediction'])                                                   .map(highlight_severity, subset=['severity'])                                                   .format({'anomaly_probability': '{:.2%}'})
             
-            st.dataframe(styled_df, use_container_width=True)
+            st.dataframe(styled_df, width='stretch')
             
             st.markdown("<br>", unsafe_allow_html=True)
             csv = res.to_csv(index=False).encode('utf-8')
@@ -393,7 +393,7 @@ elif page == "Single Record":
                 num_compromised = st.number_input("Compromised", value=0)
                 wrong_fragment = st.number_input("Wrong Fragment", value=0)
                 
-            submitted = st.form_submit_button("🧠 Analyze Vector", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("🧠 Analyze Vector", width='stretch', type="primary")
 
     with col_result:
         st.markdown("<h3 style='color: #FFFFFF; text-align: center; margin-bottom: 1rem;'>Live Result</h3>", unsafe_allow_html=True)
@@ -500,7 +500,7 @@ elif page == "Model Performance":
     # 5 Metric Cards
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1: custom_metric_card("Accuracy", f"{metadata['accuracy']:.3%}", "#00D4FF")
-    with c2: custom_metric_card("F1 Score", f"{metadata['f1_score']:.3f}", "#00FF88")
+    with c2: custom_metric_card("F1 Score", f"{metadata['f1_anomaly']:.3f}", "#00FF88")
     with c3: custom_metric_card("ROC-AUC", f"{metadata['roc_auc']:.3f}", "#00D4FF")
     with c4: custom_metric_card("FPR", f"{metadata['false_positive_rate']:.1%}", "#FF4560")
     with c5: custom_metric_card("FNR", f"{metadata['false_negative_rate']:.1%}", "#FF4560")
@@ -559,8 +559,12 @@ elif page == "Model Performance":
         with st.spinner("Rendering matrix..."):
             try:
                 cm = metadata['confusion_matrix']
-                mat = np.array([[cm['true_negative'], cm['false_positive']],
-                                [cm['false_negative'], cm['true_positive']]])
+                # confusion_matrix is stored as a 2D array [[TN, FP], [FN, TP]]
+                if isinstance(cm, list):
+                    mat = np.array(cm)
+                else:
+                    mat = np.array([[cm['true_negative'], cm['false_positive']],
+                                    [cm['false_negative'], cm['true_positive']]])
                 fig, ax = plt.subplots(figsize=(6, 5), dpi=150)
                 fig.patch.set_facecolor(plot_bg_color)
                 ax.set_facecolor(plot_bg_color)
@@ -615,9 +619,9 @@ elif page == "Model Performance":
     comp_data = {
         'Model': ['Random Forest (Production)', 'XGBoost', 'Logistic Regression'],
         'Accuracy': [f"{metadata['accuracy']:.2%}", "96.7%", "94.5%"],
-        'F1 Score': [f"{metadata['f1_score']:.3f}", "0.962", "0.938"],
+        'F1 Score': [f"{metadata['f1_anomaly']:.3f}", "0.962", "0.938"],
         'ROC-AUC': [f"{metadata['roc_auc']:.3f}", "0.945", "0.912"],
-        'Training Time': [f"{metadata['training_time_seconds']}s", "28.3s", "12.5s"]
+        'Training Time': [f"{metadata.get('training_time_seconds', 'N/A')}s", "28.3s", "12.5s"]
     }
     df_comp = pd.DataFrame(comp_data)
     def style_table(val):
@@ -625,7 +629,7 @@ elif page == "Model Performance":
             return 'background-color: rgba(0, 212, 255, 0.1); color: #00D4FF; font-weight: bold'
         return ''
     styled_comp = df_comp.style.map(style_table, subset=['Model'])
-    st.dataframe(styled_comp, use_container_width=True)
+    st.dataframe(styled_comp, width='stretch')
 
     with st.expander("Training Data Info"):
         st.markdown('''
