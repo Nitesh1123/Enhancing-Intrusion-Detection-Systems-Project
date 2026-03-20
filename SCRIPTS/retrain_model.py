@@ -50,8 +50,8 @@ metadata = {
                                model.feature_importances_, 
                                index=X.columns).nlargest(10).index),
     "confusion_matrix"   : cm.tolist(),
-    "false_positive_rate": round(fp/(fp+tn)*100, 4),
-    "false_negative_rate": round(fn/(fn+tp)*100, 4),
+    "false_positive_rate": round(fp/(fp+tn), 6),
+    "false_negative_rate": round(fn/(fn+tp), 6),
     "training_rows"      : len(X_train),
     "val_rows"           : len(X_val)
 }

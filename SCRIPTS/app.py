@@ -502,8 +502,8 @@ elif page == "Model Performance":
     with c1: custom_metric_card("Accuracy", f"{metadata['accuracy']:.3%}", "#00D4FF")
     with c2: custom_metric_card("F1 Score", f"{metadata['f1_anomaly']:.3f}", "#00FF88")
     with c3: custom_metric_card("ROC-AUC", f"{metadata['roc_auc']:.3f}", "#00D4FF")
-    with c4: custom_metric_card("FPR", f"{metadata['false_positive_rate']:.1%}", "#FF4560")
-    with c5: custom_metric_card("FNR", f"{metadata['false_negative_rate']:.1%}", "#FF4560")
+    with c4: custom_metric_card("FPR", f"{metadata['false_positive_rate']:.2%}", "#FF4560")
+    with c5: custom_metric_card("FNR", f"{metadata['false_negative_rate']:.2%}", "#FF4560")
     
     st.markdown("---")
     

@@ -124,8 +124,8 @@ A production-ready machine learning-based Intrusion Detection System that classi
 | **Accuracy** | 99.76% |
 | **F1 Score** | 99.74% |
 | **ROC-AUC** | 99.89% |
-| **False Positive Rate** | 0.8% |
-| **False Negative Rate** | 0.3% |
+| **False Positive Rate** | 0.07% |
+| **False Negative Rate** | 0.43% |
 | **Training Time** | 45.2 seconds |
 
 ### Model Comparison
