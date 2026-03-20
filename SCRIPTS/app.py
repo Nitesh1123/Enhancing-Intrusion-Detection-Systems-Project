@@ -221,7 +221,7 @@ if page == "Batch Predict":
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
         st.markdown("### 📋 Data Preview")
-        st.dataframe(data.head(), width='stretch')
+        st.dataframe(data.head(), use_container_width=True)
         
         try:
             categorical_cols = ['protocol_type', 'service', 'flag']
@@ -231,7 +231,7 @@ if page == "Batch Predict":
         except Exception as e:
             st.error(f"Encoding Error: {e}")
         
-        if st.button("🚀 Run Batch Prediction", width='stretch', type="primary"):
+        if st.button("🚀 Run Batch Prediction", type="primary"):
             with st.spinner("Analyzing network traffic vectors..."):
                 try:
                     time.sleep(0.5) # Slight UX delay
@@ -345,7 +345,7 @@ if page == "Batch Predict":
             display_df = res[display_cols].copy()
             styled_df = display_df.head(100).style.map(highlight_pred, subset=['Prediction'])                                                   .map(highlight_severity, subset=['severity'])                                                   .format({'anomaly_probability': '{:.2%}'})
             
-            st.dataframe(styled_df, width='stretch')
+            st.dataframe(styled_df, use_container_width=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             csv = res.to_csv(index=False).encode('utf-8')
@@ -393,7 +393,7 @@ elif page == "Single Record":
                 num_compromised = st.number_input("Compromised", value=0)
                 wrong_fragment = st.number_input("Wrong Fragment", value=0)
                 
-            submitted = st.form_submit_button("🧠 Analyze Vector", width='stretch', type="primary")
+            submitted = st.form_submit_button("🧠 Analyze Vector", type="primary")
 
     with col_result:
         st.markdown("<h3 style='color: #FFFFFF; text-align: center; margin-bottom: 1rem;'>Live Result</h3>", unsafe_allow_html=True)
@@ -629,7 +629,7 @@ elif page == "Model Performance":
             return 'background-color: rgba(0, 212, 255, 0.1); color: #00D4FF; font-weight: bold'
         return ''
     styled_comp = df_comp.style.map(style_table, subset=['Model'])
-    st.dataframe(styled_comp, width='stretch')
+    st.dataframe(styled_comp, use_container_width=True)
 
     with st.expander("Training Data Info"):
         st.markdown('''
