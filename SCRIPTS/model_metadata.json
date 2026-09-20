@@ -75,8 +75,8 @@
       2339
     ]
   ],
-  "false_positive_rate": 0.0743,
-  "false_negative_rate": 0.4257,
+  "false_positive_rate": 0.000743,
+  "false_negative_rate": 0.004292,
   "training_rows": 20153,
   "val_rows": 5039
 }

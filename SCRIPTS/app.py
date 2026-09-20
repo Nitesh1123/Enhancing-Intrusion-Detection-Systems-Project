@@ -70,6 +70,7 @@ def load_metadata():
 
 model = load_model()
 metadata = load_metadata()
+model_classes = [str(label).lower() for label in model.classes_]
 
 # Inject Global CSS
 st.markdown('''
@@ -235,13 +236,13 @@ if page == "Batch Predict":
             with st.spinner("Analyzing network traffic vectors..."):
                 try:
                     time.sleep(0.5) # Slight UX delay
-                    predictions = model.predict(data)
+                    predictions = pd.Series(model.predict(data)).str.lower().to_numpy()
                     prediction_proba = model.predict_proba(data)
                     
                     results_df = data.copy()
                     results_df['Prediction'] = predictions
                     
-                    anomaly_class_idx = list(model.classes_).index('Anomaly') if 'Anomaly' in model.classes_ else 1
+                    anomaly_class_idx = model_classes.index('anomaly')
                     results_df['anomaly_probability'] = prediction_proba[:, anomaly_class_idx]
                     
                     def get_severity(prob):
@@ -252,7 +253,7 @@ if page == "Batch Predict":
                     results_df['severity'] = results_df['anomaly_probability'].apply(get_severity)
                     
                     total_records = len(results_df)
-                    anomaly_count = (results_df['Prediction'] == 'Anomaly').sum()
+                    anomaly_count = (results_df['Prediction'] == 'anomaly').sum()
                     normal_count = total_records - anomaly_count
                     high_risk_count = (results_df['severity'] == 'High').sum()
                     
@@ -311,7 +312,7 @@ if page == "Batch Predict":
                     fig, ax = plt.subplots(figsize=(6,4), dpi=150)
                     fig.patch.set_facecolor(plot_bg_color)
                     ax.set_facecolor(plot_bg_color)
-                    sev_counts = res[res['Prediction'] == 'Anomaly']['severity'].value_counts()
+                    sev_counts = res[res['Prediction'] == 'anomaly']['severity'].value_counts()
                     # Ensure all categories exist
                     for s in ['High', 'Medium', 'Low']:
                         if s not in sev_counts: sev_counts[s] = 0
@@ -338,7 +339,7 @@ if page == "Batch Predict":
                 return ''
                 
             def highlight_pred(val):
-                if val == 'Anomaly': return 'background-color: rgba(255, 69, 96, 0.1); color: #FF4560; font-weight: bold'
+                if val == 'anomaly': return 'background-color: rgba(255, 69, 96, 0.1); color: #FF4560; font-weight: bold'
                 return 'background-color: rgba(0, 255, 136, 0.1); color: #00FF88; font-weight: bold'
 
             display_cols = ['Prediction', 'anomaly_probability', 'severity']
@@ -424,14 +425,14 @@ elif page == "Single Record":
                 # Ensure correct column order
                 df = df[all_feats]
                 
-                pred = model.predict(df)[0]
+                pred = str(model.predict(df)[0]).lower()
                 proba = model.predict_proba(df)[0]
-                ano_idx = list(model.classes_).index('Anomaly') if 'Anomaly' in model.classes_ else 1
+                ano_idx = model_classes.index('anomaly')
                 pval = proba[ano_idx]
                 
-                sev = "Normal"
+                sev = "normal"
                 s_color = "#00FF88"
-                if pred == "Anomaly":
+                if pred == "anomaly":
                     if pval >= 0.9: 
                         sev, s_color = "High", "#FF4560"
                     elif pval >= 0.7: 
@@ -533,7 +534,7 @@ elif page == "Model Performance":
                 from sklearn.metrics import roc_curve, auc
                 X_roc, y_roc = get_roc_data()
                 y_prob = model.predict_proba(X_roc)
-                aidx = list(model.classes_).index('Anomaly') if 'Anomaly' in model.classes_ else 1
+                aidx = model_classes.index('anomaly')
                 fpr, tpr, _ = roc_curve(y_roc, y_prob[:, aidx])
                 roc_auc = auc(fpr, tpr)
                 
@@ -616,12 +617,13 @@ elif page == "Model Performance":
 
     # Model Comparison Table
     st.markdown("### 🏆 Architecture Comparison")
+    st.caption("ℹ️ XGBoost and Logistic Regression figures are NSL-KDD literature baseline estimates, not benchmarked runs.")
     comp_data = {
-        'Model': ['Random Forest (Production)', 'XGBoost', 'Logistic Regression'],
-        'Accuracy': [f"{metadata['accuracy']:.2%}", "96.7%", "94.5%"],
-        'F1 Score': [f"{metadata['f1_anomaly']:.3f}", "0.962", "0.938"],
-        'ROC-AUC': [f"{metadata['roc_auc']:.3f}", "0.945", "0.912"],
-        'Training Time': [f"{metadata.get('training_time_seconds', 'N/A')}s", "28.3s", "12.5s"]
+        'Model': ['Random Forest (Production ✓)', 'XGBoost (estimate)', 'Logistic Regression (estimate)'],
+        'Accuracy': [f"{metadata['accuracy']:.2%}", "~96.7%", "~94.5%"],
+        'F1 Score': [f"{metadata['f1_anomaly']:.3f}", "~0.962", "~0.938"],
+        'ROC-AUC': [f"{metadata['roc_auc']:.3f}", "~0.945", "~0.912"],
+        'Training Time': [f"{metadata.get('training_time_seconds', 'N/A')}s", "~28s", "~12s"]
     }
     df_comp = pd.DataFrame(comp_data)
     def style_table(val):
